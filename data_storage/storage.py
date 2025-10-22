@@ -19,15 +19,16 @@ class Indicators:
 
 class MetaData:
     def __init__(self):
-        self.available_dates: Dict[str, Set[int]] = {}
+        self.available_dates: Dict[str, Dict[OptionType, Set[int]]] = {}
 
         # self.available_strikes: Dict[Underlying, Dict[int, Dict[OptionType, Dict[int,Set[int]]]]] = {}
 
-        self.Contracts: Dict[int, Dict[int, Dict[Underlying, Dict[OptionType, Dict[int, Dict[float, Contract]]]]]] = {}
+        # date -> time -> Underlying -> OptionType -> expiry -> strike : Contract
+        self.contracts: Dict[int, Dict[int, Dict[Underlying, Dict[OptionType, Dict[int, Dict[float, Contract]]]]]] = {}
         # self.expiries: Dict[int, Dict[ExpiryType, int]] = {}
 
-        ## date -> option_type -> underlyig -> timeframe -> time -> quote
-        self.quote_data: Dict[int, Dict[OptionType, Dict[str, Dict[int, Dict[int, Quote]]]]]
+        ## date -> option_type -> underlyig -> symbol -> timeframe -> time -> quote
+        self.quote_data: Dict[int, Dict[OptionType, Dict[str, Dict[str, Dict[int, Dict[int, Quote]]]]]] = {}
 
         self.indicators: Indicators = Indicators()
 

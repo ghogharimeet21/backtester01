@@ -41,36 +41,36 @@ def load_data_from_dataset():
 
     available_underlying = os.listdir(dataset_path)
 
-    for table in available_underlying:
-        if table.__contains__("."):
+    for underlying in available_underlying:
+        if underlying.__contains__("."):
             continue
 
-        if table not in config_dict:
+        if underlying not in config_dict:
             continue
 
-        load_dates = config_dict[table]
+        load_dates = config_dict[underlying]
         
-        underlying_path = os.path.join(dataset_path, table)
+        underlying_path = os.path.join(dataset_path, underlying)
 
-        available_Contract_type = os.listdir(underlying_path)
+        available_contract_type = os.listdir(underlying_path)
         
+        if underlying not in meta_data.available_dates:
+            meta_data.available_dates[underlying] = set()
 
-        for contract_type in ["nifty_eq", "nifty_pe", "nifty_ce", "nifty_fut"]:
+        for underlying_type in ["nifty_eq", "nifty_pe", "nifty_ce", "nifty_fut"]:
 
-            print(f"loading {contract_type}")
+            print(f"loading {underlying_type}")
 
-            if contract_type == "nifty_fut":
+            if underlying_type == "nifty_fut":
                 # temp condition
                 continue
 
-            if contract_type.split("_")[0] == "nifty":
-                meta_data.available_dates["nifty"] = set()
 
             stock_type = (
-                OptionType.EQ if contract_type == f"{table}_eq" else
-                OptionType.CE if contract_type == f"{table}_ce" else
-                OptionType.PE if contract_type == f"{table}_pe" else
-                OptionType.FUT if contract_type == f"{table}_fut" else
+                OptionType.EQ if underlying_type == f"{underlying}_eq" else
+                OptionType.CE if underlying_type == f"{underlying}_ce" else
+                OptionType.PE if underlying_type == f"{underlying}_pe" else
+                OptionType.FUT if underlying_type == f"{underlying}_fut" else
                 None
             )
 
@@ -78,7 +78,7 @@ def load_data_from_dataset():
                 print("skipping new Contract type in none")
                 continue
 
-            all_files_path = os.path.join(underlying_path, contract_type)
+            all_files_path = os.path.join(underlying_path, underlying_type)
 
             all_files = os.listdir(all_files_path)
 
@@ -94,8 +94,6 @@ def load_data_from_dataset():
 
                 df.fillna(0, inplace=True)
 
-
-
                 if file_date not in meta_data.quote_data:
                     meta_data.quote_data[file_date] = {}
 
@@ -107,7 +105,6 @@ def load_data_from_dataset():
                         symbol = str(row["tradingsymbol"])
                     except KeyError:
                         symbol = str(row["symbol"])
-                        
 
                     strike = int(row["strike"]) if "strike" in df.columns else None
                     expiry = int(row["expiry"]) if "expiry" in df.columns else None
@@ -122,7 +119,7 @@ def load_data_from_dataset():
                     coi = float(row["coi"]) if "coi" in df.columns else 0
                     
 
-                    meta_data.available_dates["nifty"].add(date)
+                    meta_data.available_dates[underlying].add(date)
 
                     contract = Contract(
                         symbol,
@@ -143,22 +140,16 @@ def load_data_from_dataset():
                         coi,
                     )
 
-
-                    # if time not in meta_data.quote_data[TimeFrames.one_minute]:
-                    #     meta_data.quote_data[TimeFrames.one_minute][date][time] = {}
-                    # if stock_type not in meta_data.quote_data[TimeFrames.one_minute][date][time]:
-                    #     meta_data.quote_data[TimeFrames.one_minute][date][time][stock_type] = {}
-                    # if symbol not in meta_data.quote_data[TimeFrames.one_minute][date][time][stock_type]:
-                    #     meta_data.quote_data[TimeFrames.one_minute][date][time][stock_type][symbol] = quote
-
                     if stock_type not in meta_data.quote_data[file_date]:
                         meta_data.quote_data[file_date][stock_type] = {}
-                    if symbol not in meta_data.quote_data[file_date][stock_type]:
-                        meta_data.quote_data[file_date][stock_type][symbol] = {}
-                    if 1 not in meta_data.quote_data[file_date][stock_type][symbol]:
-                        meta_data.quote_data[file_date][stock_type][symbol][1] = {}
-                    if time not in meta_data.quote_data[file_date][stock_type][symbol][1]:
-                        meta_data.quote_data[file_date][stock_type][symbol][1][time] = quote
+                    if underlying not in meta_data.quote_data[file_date][stock_type]:
+                        meta_data.quote_data[file_date][stock_type][underlying] = {}
+                    if symbol not in meta_data.quote_data[file_date][stock_type][underlying]:
+                        meta_data.quote_data[file_date][stock_type][underlying][symbol] = {}
+                    if 1 not in meta_data.quote_data[file_date][stock_type][underlying][symbol]:
+                        meta_data.quote_data[file_date][stock_type][underlying][symbol][1] = {}
+                    if time not in meta_data.quote_data[file_date][stock_type][underlying][symbol][1]:
+                        meta_data.quote_data[file_date][stock_type][underlying][symbol][1][time] = quote
                     
 
                     if (expiry is not None) and (strike is None):
