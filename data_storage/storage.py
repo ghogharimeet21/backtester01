@@ -3,6 +3,9 @@ from typing import Dict, List, Tuple, Set
 from commons.enums import ExpiryType, OptionType, Underlying
 from commons.models import Candle, Contract
 from data_storage.enums import TimeFrames
+from data_storage.metadata_manupulator.Indicator_engine.models import (
+    Sma
+)
 from data_storage.models import Quote
 
 
@@ -13,8 +16,8 @@ from data_storage.models import Quote
 
 class Indicators:
     def __init__(self):
-        # dict[time_frame, dict[option_type, dict[symbol, dict[date, dict[time, sma_value]]]]]
-        self.sma: Dict[str, Dict[OptionType, Dict[str, dict[int, Dict[int, float]]]]] = {}
+        # time_frame -> date -> time -> option_type -> underlying -> symbol -> sma_value
+        self.sma: Dict[int, Dict[int, Dict[int, Dict[OptionType, Dict[str, Dict[str, Sma]]]]]]
 
 
 class MetaData:
@@ -30,7 +33,10 @@ class MetaData:
         ## date -> option_type -> underlyig -> symbol -> timeframe -> time -> quote
         self.quote_data: Dict[int, Dict[OptionType, Dict[str, Dict[str, Dict[int, Dict[int, Quote]]]]]] = {}
 
+        ## time_frame -> date -> time -> option_type -> underlying -> symbol -> quote
+        self.quote_data: Dict[int, Dict[int, Dict[int, Dict[OptionType, Dict[str, Dict[str, Quote]]]]]]
+
         self.indicators: Indicators = Indicators()
 
 
-meta_data = MetaData()
+meta_data: MetaData = MetaData()

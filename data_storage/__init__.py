@@ -35,8 +35,6 @@ def load_data_from_dataset():
         
         config_dict[underlying] = get_date_span(start_date, end_date, "%y%m%d")
 
-        
-
     dataset_path = os.path.join(cwd, "feather_dataset")
 
     available_underlying = os.listdir(dataset_path)
@@ -74,6 +72,9 @@ def load_data_from_dataset():
                 None
             )
 
+            if stock_type not in meta_data.available_dates[underlying]:
+                meta_data.available_dates[underlying][stock_type] = set()
+
             if not stock_type:
                 print("skipping new Contract type in none")
                 continue
@@ -84,6 +85,8 @@ def load_data_from_dataset():
 
             for file_name in all_files:
                 file_date = int(file_name.replace(".feather", "").split("_")[-1])
+
+                meta_data.available_dates[underlying][stock_type].add(file_date)
                 
                 if file_date not in load_dates:
                     continue
@@ -140,34 +143,27 @@ def load_data_from_dataset():
                         coi,
                     )
 
-                    if stock_type not in meta_data.quote_data[file_date]:
-                        meta_data.quote_data[file_date][stock_type] = {}
-                    if underlying not in meta_data.quote_data[file_date][stock_type]:
-                        meta_data.quote_data[file_date][stock_type][underlying] = {}
-                    if symbol not in meta_data.quote_data[file_date][stock_type][underlying]:
-                        meta_data.quote_data[file_date][stock_type][underlying][symbol] = {}
-                    if 1 not in meta_data.quote_data[file_date][stock_type][underlying][symbol]:
-                        meta_data.quote_data[file_date][stock_type][underlying][symbol][1] = {}
-                    if time not in meta_data.quote_data[file_date][stock_type][underlying][symbol][1]:
-                        meta_data.quote_data[file_date][stock_type][underlying][symbol][1][time] = quote
+                    if 1 not in meta_data.quote_data:
+                        meta_data.quote_data[1] = {}
+                    if time not in meta_data.quote_data[file_date]:
+                        meta_data.quote_data[1][file_date][time] = {}
+                    if stock_type not in meta_data.quote_data[file_date][time]:
+                        meta_data.quote_data[1][file_date][time][stock_type] = {}
+                    if underlying not in meta_data.quote_data[1][file_date][time][stock_type]:
+                        meta_data.quote_data[1][file_date][time][stock_type][underlying] = {}
+                    if symbol not in meta_data.quote_data[1][file_date][time][stock_type][underlying]:
+                        meta_data.quote_data[1][file_date][time][stock_type][underlying][symbol] = {}
+                    meta_data.quote_data[1][file_date][time][stock_type][underlying][symbol] = quote
+
                     
 
                     if (expiry is not None) and (strike is None):
                         # Futute contract
                         ...
-                    
 
                     if (strike is not None) and (expiry is not None):
                         # Options contracts
-
-
                         ...
-                
-                    
-                    
-
-                    
-
 
 
 
